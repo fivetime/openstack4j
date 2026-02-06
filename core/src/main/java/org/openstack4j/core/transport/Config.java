@@ -6,6 +6,8 @@ import javax.net.ssl.SSLContext;
 import org.openstack4j.api.identity.EndpointURLResolver;
 import org.openstack4j.model.common.resolvers.ServiceVersionResolver;
 
+import java.util.Map;
+
 /**
  * OpenStack4j Configuration - options that are configured with OpenStack4j clients.
  *
@@ -24,6 +26,7 @@ public final class Config {
     private int maxConnections;
     private int maxConnectionsPerRoute;
     private ProxyHost proxy;
+    private Map<String, String> dnsMapping;
     private ServiceVersionResolver resolver;
     private EndpointURLResolver endpointURLResolver;
 
@@ -147,6 +150,34 @@ public final class Config {
     public Config withEndpointNATResolution(String natHostOrIP) {
         this.natHostOrIP = natHostOrIP;
         return this;
+    }
+
+    /**
+     * Adds a custom DNS mapping that resolves hostnames matching a given suffix
+     * to a specified IP address. Useful for K8s-deployed OpenStack where endpoints
+     * use cluster-local DNS names, while preserving the Host header for Ingress routing.
+     *
+     * <p>Example:
+     * {@code config.withDnsMapping(".svc.cluster.local", "10.224.18.3")}
+     *
+     * @param domainSuffix the domain suffix to match (e.g. ".svc.cluster.local")
+     * @param ipAddress    the IP address to resolve to
+     * @return Config
+     */
+    public Config withDnsMapping(String domainSuffix, String ipAddress) {
+        if (this.dnsMapping == null) {
+            this.dnsMapping = new java.util.LinkedHashMap<>();
+        }
+        this.dnsMapping.put(domainSuffix, ipAddress);
+        return this;
+    }
+
+    public java.util.Map<String, String> getDnsMapping() {
+        return dnsMapping;
+    }
+
+    public boolean hasDnsMapping() {
+        return dnsMapping != null && !dnsMapping.isEmpty();
     }
 
     /**

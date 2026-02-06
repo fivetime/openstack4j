@@ -1,9 +1,11 @@
 package org.openstack4j.connectors.okhttp;
 
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -67,6 +69,17 @@ public final class HttpCommand<R> {
             okHttpClientBuilder.hostnameVerifier(config.getHostNameVerifier());
         if (HttpLoggingFilter.isLoggingEnabled()) {
             okHttpClientBuilder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+        }
+        if (config.hasDnsMapping()) {
+            final Map<String, String> dnsMapping = config.getDnsMapping();
+            okHttpClientBuilder.dns(hostname -> {
+                for (Map.Entry<String, String> entry : dnsMapping.entrySet()) {
+                    if (hostname.endsWith(entry.getKey())) {
+                        return Collections.singletonList(InetAddress.getByName(entry.getValue()));
+                    }
+                }
+                return Dns.SYSTEM.lookup(hostname);
+            });
         }
         okHttpClientBuilder.connectionPool(getConnectionPool());
         client = okHttpClientBuilder.build();
