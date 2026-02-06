@@ -1,0 +1,18 @@
+# BasicExample 用的配置文件
+openstack:
+  event:
+    clusters:
+      cluster-a:
+        rabbitmq:
+          host: 10.224.18.6
+          port: 5672
+        vhosts:
+          nova:
+            username: nova
+            password: password
+          cinder:
+            username: cinder
+            password: password
+          neutron:
+            username: neutron
+            password: password

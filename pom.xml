@@ -52,6 +52,8 @@
         <module>connectors</module>
 <!--        <module>core-integration-test</module>-->
 <!--        <module>distribution</module>-->
+        <module>event</module>
+<!--        <module>event-test</module>-->
     </modules>
     <dependencies>
         <dependency>

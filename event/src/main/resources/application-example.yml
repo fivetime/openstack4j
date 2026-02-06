@@ -1,0 +1,83 @@
+# ============================================================
+# OpenStack Event Library - Example Configuration
+# ============================================================
+# Supports both RabbitMQ and Kafka transports.
+# "vhosts" and "services" keys are interchangeable.
+
+openstack:
+  event:
+    enabled: true
+    topic: notifications          # oslo.messaging topic (default: notifications)
+    prefetch-count: 10            # RabbitMQ prefetch per channel
+    reconnect-interval: 5s        # RabbitMQ auto-recovery interval
+
+    clusters:
+
+      # ---- Cluster A: RabbitMQ (default transport) ----
+      cluster-a:
+        transport: rabbitmq       # default, can be omitted
+        rabbitmq:
+          host: 10.224.18.6
+          port: 5672
+          ssl: false
+          connection-timeout: 10000
+          heartbeat: 30
+        # "vhosts" or "services" — both work
+        vhosts:
+          nova:
+            username: nova
+            password: password
+            # vhost defaults to "/nova" (from key name)
+            # exchange defaults to "nova" (from key name)
+          cinder:
+            username: cinder
+            password: password
+          neutron:
+            username: neutron
+            password: password
+          glance:
+            username: glance
+            password: password
+          keystone:
+            username: keystone
+            password: password
+          heat:
+            username: heat
+            password: password
+
+      # ---- Cluster B: Kafka (oslo.messaging kafka driver) ----
+      cluster-b:
+        transport: kafka
+        kafka:
+          bootstrap-servers: 10.225.20.6:9092
+          group-id: openstack-event-consumer
+          auto-offset-reset: earliest       # or "latest"
+          enable-auto-commit: true
+          max-poll-records: 100
+          poll-timeout-ms: 1000
+          # security-protocol: SASL_PLAINTEXT
+          # sasl-mechanism: PLAIN
+          # sasl-jaas-config: "org.apache.kafka.common.security.plain.PlainLoginModule required username='admin' password='secret';"
+        services:
+          nova:
+            username: ""          # not used for Kafka, but kept for uniformity
+            password: ""
+            # topic defaults to "nova.notifications"
+            # topic-override: custom-nova-topic   # override if needed
+          cinder:
+            username: ""
+            password: ""
+          neutron:
+            username: ""
+            password: ""
+
+      # ---- Cluster C: Redpanda (Kafka-compatible) ----
+      # cluster-c:
+      #   transport: kafka
+      #   kafka:
+      #     bootstrap-servers: redpanda-0:9092,redpanda-1:9092
+      #     group-id: openstack-event-redpanda
+      #   services:
+      #     nova:
+      #       username: ""
+      #       password: ""
