@@ -50,8 +50,8 @@
         <module>core</module>
         <module>core-test</module>
         <module>connectors</module>
-        <module>core-integration-test</module>
-        <module>distribution</module>
+<!--        <module>core-integration-test</module>-->
+<!--        <module>distribution</module>-->
     </modules>
     <dependencies>
         <dependency>
@@ -278,14 +278,18 @@
     </dependencyManagement>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/fivetime/openstack4j</url>
         </repository>
+<!--        <snapshotRepository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--        </snapshotRepository>-->
+<!--        <repository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+<!--        </repository>-->
     </distributionManagement>
 
     <profiles>

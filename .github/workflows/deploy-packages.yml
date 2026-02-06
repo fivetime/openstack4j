@@ -1,0 +1,55 @@
+name: Deploy & Publish Package Index
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Configure Maven
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << EOF
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ github.actor }}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Build & Deploy to GitHub Packages
+        run: mvn clean deploy -DskipTests -Pjava-21
+
+      - name: Generate package index page
+        run: |
+          python3 .github/scripts/generate-index.py \
+            "${{ github.repository_owner }}" \
+            "${{ github.event.repository.name }}" \
+            "${{ secrets.GITHUB_TOKEN }}" \
+            "${{ github.sha }}"
+        
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
