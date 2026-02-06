@@ -52,6 +52,11 @@ public class NovaServerCreate implements ServerCreate {
     @JsonProperty("block_device_mapping_v2")
     private List<BlockDeviceMappingCreate> blockDeviceMapping;
 
+    @JsonIgnore
+    public List<BlockDeviceMappingCreate> getBlockDeviceMapping() {
+        return blockDeviceMapping;
+    }
+
     public static ServerCreateBuilder builder() {
         return new ServerCreateConcreteBuilder();
     }
@@ -397,6 +402,5 @@ public class NovaServerCreate implements ServerCreate {
             m.configDrive = configDrive;
             return this;
         }
-
     }
 }

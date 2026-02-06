@@ -104,9 +104,29 @@ public class ServerServiceImpl extends BaseComputeServices implements ServerServ
     @Override
     public Server boot(ServerCreate server) {
         Objects.requireNonNull(server);
-        return post(NovaServer.class, uri("/servers"))
-                .entity(WrapServerIfApplicableFunction.INSTANCE.apply(server))
-                .execute();
+        Invocation<NovaServer> invocation = post(NovaServer.class, uri("/servers"))
+                .entity(WrapServerIfApplicableFunction.INSTANCE.apply(server));
+        if (requiresMicroVersion(server)) {
+            invocation = invocation.header("X-OpenStack-Nova-API-Version", "2.67");
+        }
+        return invocation.execute();
+    }
+
+    private boolean requiresMicroVersion(ServerCreate server) {
+        if (server instanceof NovaServerCreate) {
+            NovaServerCreate novaServer = (NovaServerCreate) server;
+            List<? extends BlockDeviceMappingCreate> bdms = novaServer.getBlockDeviceMapping();
+            if (bdms != null) {
+                for (BlockDeviceMappingCreate bdm : bdms) {
+                    if (bdm instanceof NovaBlockDeviceMappingCreate) {
+                        if (((NovaBlockDeviceMappingCreate) bdm).volumeType != null) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -343,7 +363,7 @@ public class ServerServiceImpl extends BaseComputeServices implements ServerServ
     }
 
     /**
-     * {{@link #invokeAction(String, String)}
+     * {{@link #invokeAction(String, BackupOptions)}
      */
     @Override
     public ActionResponse backupServer(String serverId, BackupOptions options) {
